@@ -1,0 +1,4 @@
+*.vs
+x64/
+high-level/x64
+low-level/x64
