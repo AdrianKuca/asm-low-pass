@@ -1,7 +1,7 @@
-#include "pch.h" 
-#include "high-level.h" 
+#include "pch.h"
+#include "high-level.h"
 
-void filter_high(const BYTE* input_image, BYTE* output_image, const int width, const int height)
+void filter_high(const BYTE *input_image, BYTE *output_image, const int width, const int height)
 {
 	int j;
 	double sum;
@@ -9,19 +9,20 @@ void filter_high(const BYTE* input_image, BYTE* output_image, const int width, c
 	int nextZero = 2 * width - 1;
 	int lenmwidthmone = length - width - 1;
 
-	memset(output_image, 0, length); // whole image set to 0
 	for (j = width + 1; j < lenmwidthmone; ++j) // start from the second row and end before the last row starts
 	{
-		if (j == nextZero) { // j is on the last pixel of the row
+		if (j == nextZero)
+		{						 // j is on the last pixel of the row
 			output_image[j] = 0; // this pixel and also the next one are set to 0
 			output_image[j + 1] = 0;
-			j++; // skip first pixel of the next line
+			j++;			   // skip first pixel of the next line
 			nextZero += width; // remember to stop at the last pixel of the next line
 		}
-		else {
+		else
+		{
 			sum = 0;
 
-			//center 
+			//center
 			sum += 1 / 9 * input_image[j];
 			int jmwidth = j - width;
 			int jpwidth = j + width;
@@ -31,7 +32,6 @@ void filter_high(const BYTE* input_image, BYTE* output_image, const int width, c
 
 			//diagonals
 			sum += 1 / 9 * (input_image[jmwidth - 1] + input_image[jmwidth + 1] + input_image[jpwidth - 1] + input_image[jpwidth + 1]);
-
 
 			output_image[j] = (BYTE)sum;
 		}
