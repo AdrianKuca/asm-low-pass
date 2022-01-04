@@ -10,13 +10,13 @@
 		; Dont use simd for width < 32 pixels
 		ret
 	enough_pixels:
-		; Use R8/32  iterations of simds for single line of the image
+		; Use R8/32  iterations of simds for single line of the input image (leave reminder of the image for further calculation)
 		mov ecx, r8/32
 	x_loop:
 		; Load 32 bytes from 3 next rows and sum them into ymm0
 		vmovntdqa ymm1, [RDX]+ x_index*32 
-		vmovntdqa ymm2, [RDX]+ y_index+1 + x_index*32 
-		vmovntdqa ymm3, [RDX]+ y_index+2 + x_index*32 
+		vmovntdqa ymm2, [RDX]+ (y_index*r8)+1 + x_index*32 
+		vmovntdqa ymm3, [RDX]+ (y_index*r8)+2 + x_index*32 
 		vpaddb ymm4, ymm1, ymm2
 		vpaddb ymm0, ymm3, ymm4
 		
