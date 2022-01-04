@@ -103,7 +103,17 @@
 		mov ecx, r8
 		jmp y_single_pixel_loop
 	end_of_image_remainder:
+		; Recalculate every 1st and 32th pixel of the image
+		mov ecx, r8
+		mov y_index, 0
+	y_single_pixel_loop_recalc:
+		mov x_index, 0
+	x_single_pixel_loop_recalc:
+
+	
 	filter_low endp
+	
+
 end
 
 .data
