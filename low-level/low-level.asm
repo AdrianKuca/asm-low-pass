@@ -34,6 +34,11 @@
 		vpslldq ymm6, ymm3, 1
 		vpaddb ymm7, ymm4, ymm5
 		vpaddb ymm0, ymm7, ymm6
+		
+		; Divide ymm0 by 9
+		vpbroadcastw ymm8, 32768 / 9
+		vpmulhrsw ymm0, ymm0, ymm8
+
 
 		; Increment index 
 		mov rax, x_index
