@@ -12,6 +12,8 @@
 	enough_pixels:
 		; Use R8/32  iterations of simds for single line of the input image (leave reminder of the image for further calculation)
 		mov ecx, r8/32
+	y_loop:
+		mov x_index, 0
 	x_loop:
 		; Load 32 bytes from 3 next rows and sum them into ymm0
 		vmovntdqa ymm1, [RDX]+ x_index*32 
@@ -39,13 +41,26 @@
 		vpbroadcastw ymm8, 32768 / 9
 		vpmulhrsw ymm0, ymm0, ymm8
 
+		; Save ymm0 into next row of output image
+		vmovntdq [RDX] + (y_index+1)*r8 +(x_index+1)*32 , ymm0
 
-		; Increment index 
+		; Increment x_index which means go right by 32 pixels
 		mov rax, x_index
 		add rax, 1
 		mov x_index, rax
 		loop x_loop
 
+		; Increment y_index which means go down by 1 row
+		mov rax, y_index
+		add rax, 1
+		mov y_index, rax
+		; Check if we are at the end of the image
+		cmp y_index, r9
+		je end_of_image
+		mov ecx, r8/32
+		jmp y_loop
+
+	end_of_image:
 	filter_low endp
 end
 
