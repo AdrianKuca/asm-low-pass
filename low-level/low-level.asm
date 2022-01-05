@@ -108,9 +108,58 @@
 		mov y_index, 0
 	y_single_pixel_loop_recalc:
 		mov x_index, 0
+		mov ecx, r8
 	x_single_pixel_loop_recalc:
+		; Recalculate every first pixel of 32 bytes
+			; Add neighbouring pixels from the same row
+			mov rax, [RDX] + (y_index+1)*r8 + ((32*x_index)+1)
+			add rax, [RDX] + (y_index+1)*r8 + ((32*x_index))
+			add rax, [RDX] + (y_index+1)*r8 + ((32*x_index)+2)
+			; Add neighbouring pixels from the next row
+			add rax, [RDX] + (y_index+2)*r8 + ((32*x_index))
+			add rax, [RDX] + (y_index+2)*r8 + ((32*x_index)+1)
+			add rax, [RDX] + (y_index+2)*r8 + ((32*x_index)+2)
+			; Add neighbouring pixels from the previous row
+			add rax, [RDX] + (y_index)*r8 + ((32*x_index))
+			add rax, [RDX] + (y_index)*r8 + ((32*x_index)+1)
+			add rax, [RDX] + (y_index)*r8 + ((32*x_index)+2)
+			; Divide by 9
+			mov rax, rax / 9
+			; Save result into [RDX]+ (x_index+1)
+			mov [RDX] + (y_index+1)*r8 + (32*x_index+1), rax
+		; Recalculate every last pixel of 32 bytes
+			; Add neighbouring pixels from the same row
+			mov rax, [RDX] + (y_index+1)*r8 + (31+(32*x_index)+1)
+			add rax, [RDX] + (y_index+1)*r8 + (31+(32*x_index))
+			add rax, [RDX] + (y_index+1)*r8 + (31+(32*x_index)+2)
+			; Add neighbouring pixels from the next row
+			add rax, [RDX] + (y_index+2)*r8 + (31+(32*x_index))
+			add rax, [RDX] + (y_index+2)*r8 + (31+(32*x_index)+1)
+			add rax, [RDX] + (y_index+2)*r8 + (31+(32*x_index)+2)
+			; Add neighbouring pixels from the previous row
+			add rax, [RDX] + (y_index)*r8 + (31+(32*x_index))
+			add rax, [RDX] + (y_index)*r8 + (31+(32*x_index)+1)
+			add rax, [RDX] + (y_index)*r8 + (31+(32*x_index)+2)
+			; Divide by 9
+			mov rax, rax / 9
+			; Save result into [RDX]+ (x_index+1)
+			mov [RDX] + (y_index+1)*r8 + (31+32*x_index+1), rax
 
-	
+		; Increment x_index which means go right by 1 pixel
+		mov rax, x_index
+		add rax, 1
+		mov x_index, rax
+
+		loop x_single_pixel_loop_recalc
+		; Increment y_index which means go down by 1 row
+		mov rax, y_index
+		add rax, 1
+		mov y_index, rax
+		; Check if we are at the end of the image
+		cmp y_index, r9
+		je end_of_proc
+		jmp y_single_pixel_loop_recalc
+	end_of_proc:
 	filter_low endp
 	
 
