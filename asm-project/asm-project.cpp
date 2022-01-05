@@ -22,12 +22,10 @@ int main()
 
 	// Process image high level
 	BYTE *output_image_high = new BYTE[M * N];
-	memset(output_image_high, 0, M * N); // whole image set to 0
 	filter_high(input_image, output_image_high, N, M);
 
 	// Process image low level
 	BYTE *output_image_low = new BYTE[M * N];
-	memset(output_image_low, 0, M * N); // whole image set to 0
 	filter_low(input_image, output_image_low, N, M);
 
 	if (compare_images(output_image_high, output_image_low, N, M))
