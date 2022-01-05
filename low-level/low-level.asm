@@ -147,7 +147,29 @@
 		je clear_edges
 		jmp y_single_pixel_loop_recalc
 	clear_edges:
-	ret
+		mov y_index, 0
+		mov x_index, 0
+		mov ecx, r8
+	x_loop_clear_first:
+		; clear 0th line
+		mov [RDX] + (x_index), 0
+		loop x_loop_clear_first
+		mov x_index, 0
+		mov ecx, r8
+	x_loop_clear_last:
+		; clear last line
+		mov [RDX] + (r9-1)*r8 + (x_index), 0
+		loop x_loop_clear_last
+		mov x_index, 0
+		mov ecx, r9
+		
+	y_loop_clear:
+		; clear first and last column
+		mov [RDX] + y_index*r8, 0
+		mov [RDX] + y_index*r8 + r8-1, 0
+		loop y_loop_clear
+
+		ret
 	filter_low endp
 	
 
