@@ -12,7 +12,9 @@
 	enough_pixels:
 		; Use R8/32  iterations of simds for single line of the input image (leave reminder of the image for further calculation)
 	y_loop:
-		mov ecx, r8/32
+		mov eax, r8
+		div 32
+		mov ecx, eax
 		mov x_index, 0
 	x_loop:
 		; Load 32 bytes from 3 next rows and sum them into ymm0
@@ -57,10 +59,11 @@
 
 	end_of_image:
 		; Calculate the remaining width of the image
+		mov eax, r8
+		div 32
+		mow r10, edx
+		mov r10, r8-r10
 		mov ecx, r8
-		sub ecx, r8/32
-		mov r10, r8/32 
-		mov r10, r10*32
 		mov y_index, 0
 	y_single_pixel_loop:
 		mov x_index, 0
@@ -84,8 +87,8 @@
 			mov [RDX] + (y_index+1)*r8 + (x_index+1), rax
 			; Increment x_index which means go right by 1 pixel
 			mov x_index, x_index+1
-
 		loop x_single_pixel_loop
+
 		; Increment y_index which means go down by 1 row
 		mov y_index, y_index+1
 		
