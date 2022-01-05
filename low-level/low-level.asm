@@ -11,8 +11,8 @@
 		ret
 	enough_pixels:
 		; Use R8/32  iterations of simds for single line of the input image (leave reminder of the image for further calculation)
-		mov ecx, r8/32
 	y_loop:
+		mov ecx, r8/32
 		mov x_index, 0
 	x_loop:
 		; Load 32 bytes from 3 next rows and sum them into ymm0
@@ -57,7 +57,6 @@
 		; Check if we are at the end of the image
 		cmp y_index, r9
 		je end_of_image
-		mov ecx, r8/32
 		jmp y_loop
 
 	end_of_image:
@@ -70,27 +69,27 @@
 	y_single_pixel_loop:
 		mov x_index, 0
 	x_single_pixel_loop:
-		; Load single pixel from [RDX]+ (x_index+1) 
-		mov rax, [RDX] + (y_index+1)*r8 + (r10 + x_index+1)
-		; Add neighbouring pixels from the same row
-		add rax, [RDX] + (y_index+1)*r8 + (r10 + x_index)
-		add rax, [RDX] + (y_index+1)*r8 + (r10 + x_index+2)
-		; Add neighbouring pixels from the next row
-		add rax, [RDX] + (y_index+2)*r8 + (r10 + x_index)
-		add rax, [RDX] + (y_index+2)*r8 + (r10 + x_index+1)
-		add rax, [RDX] + (y_index+2)*r8 + (r10 + x_index+2)
-		; Add neighbouring pixels from the previous row
-		add rax, [RDX] + (y_index)*r8 + (r10 + x_index)
-		add rax, [RDX] + (y_index)*r8 + (r10 + x_index+1)
-		add rax, [RDX] + (y_index)*r8 + (r10 + x_index+2)
-		; Divide by 9
-		mov rax, rax / 9
-		; Save result into [RDX]+ (x_index+1)
-		mov [RDX] + (y_index+1)*r8 + (x_index+1), rax
-		; Increment x_index which means go right by 1 pixel
-		mov rax, x_index
-		add rax, 1
-		mov x_index, rax
+		; Recalculate single pixel from the remaining width of the image
+			; Add neighbouring pixels from the same row
+			mov rax, [RDX] + (y_index+1)*r8 + (r10 + x_index+1)
+			add rax, [RDX] + (y_index+1)*r8 + (r10 + x_index)
+			add rax, [RDX] + (y_index+1)*r8 + (r10 + x_index+2)
+			; Add neighbouring pixels from the next row
+			add rax, [RDX] + (y_index+2)*r8 + (r10 + x_index)
+			add rax, [RDX] + (y_index+2)*r8 + (r10 + x_index+1)
+			add rax, [RDX] + (y_index+2)*r8 + (r10 + x_index+2)
+			; Add neighbouring pixels from the previous row
+			add rax, [RDX] + (y_index)*r8 + (r10 + x_index)
+			add rax, [RDX] + (y_index)*r8 + (r10 + x_index+1)
+			add rax, [RDX] + (y_index)*r8 + (r10 + x_index+2)
+			; Divide by 9
+			mov rax, rax / 9
+			; Save result into [RDX]+ (x_index+1)
+			mov [RDX] + (y_index+1)*r8 + (x_index+1), rax
+			; Increment x_index which means go right by 1 pixel
+			mov rax, x_index
+			add rax, 1
+			mov x_index, rax
 
 		loop x_single_pixel_loop
 		; Increment y_index which means go down by 1 row
@@ -104,7 +103,6 @@
 		jmp y_single_pixel_loop
 	end_of_image_remainder:
 		; Recalculate every 1st and 32th pixel of the image
-		mov ecx, r8
 		mov y_index, 0
 	y_single_pixel_loop_recalc:
 		mov x_index, 0
