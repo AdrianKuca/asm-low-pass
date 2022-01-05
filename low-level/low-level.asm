@@ -4,13 +4,9 @@
 		; RCX input_image; RDX output_image; R8 width; R9 height
 		
 		cmp r8, 32
-		jl not_enough_pixels
-		jmp enough_pixels
-	not_enough_pixels:
-		; Dont use simd for width < 32 pixels
-		ret
-	enough_pixels:
-		; Use R8/32  iterations of simds for single line of the input image (leave reminder of the image for further calculation)
+		jl end_of_image ; Skip simd for width < 32 pixels
+		
+	; Use R8/32  iterations of simds for single line of the input image (leave reminder of the image for further calculation)
 	y_loop:
 		mov eax, r8
 		div 32
