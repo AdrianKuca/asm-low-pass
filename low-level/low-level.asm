@@ -49,7 +49,7 @@
 		; Increment y_index which means go down by 1 row
 		mov y_index, y_index+1
 		; Check if we are at the end of the image
-		cmp y_index, r9
+		cmp y_index, r9-2
 		je end_of_image
 		jmp y_loop
 
@@ -89,7 +89,7 @@
 		mov y_index, y_index+1
 		
 		; Check if we are at the end of the image
-		cmp y_index, r9
+		cmp y_index, r9-2
 		je end_of_image_remainder
 		mov ecx, r8
 		jmp y_single_pixel_loop
@@ -143,10 +143,11 @@
 		mov y_index, y_index+1
 
 		; Check if we are at the end of the image
-		cmp y_index, r9
+		cmp y_index, r9-2
 		je end_of_proc
 		jmp y_single_pixel_loop_recalc
 	end_of_proc:
+	ret
 	filter_low endp
 	
 
