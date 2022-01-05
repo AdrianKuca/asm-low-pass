@@ -45,15 +45,11 @@
 		vmovntdq [RDX] + (y_index+1)*r8 +(x_index+1)*32 , ymm0
 
 		; Increment x_index which means go right by 32 pixels
-		mov rax, x_index
-		add rax, 1
-		mov x_index, rax
+		mov x_index, x_index+1
 		loop x_loop
 
 		; Increment y_index which means go down by 1 row
-		mov rax, y_index
-		add rax, 1
-		mov y_index, rax
+		mov y_index, y_index+1
 		; Check if we are at the end of the image
 		cmp y_index, r9
 		je end_of_image
@@ -87,15 +83,12 @@
 			; Save result into [RDX]+ (x_index+1)
 			mov [RDX] + (y_index+1)*r8 + (x_index+1), rax
 			; Increment x_index which means go right by 1 pixel
-			mov rax, x_index
-			add rax, 1
-			mov x_index, rax
+			mov x_index, x_index+1
 
 		loop x_single_pixel_loop
 		; Increment y_index which means go down by 1 row
-		mov rax, y_index
-		add rax, 1
-		mov y_index, rax
+		mov y_index, y_index+1
+		
 		; Check if we are at the end of the image
 		cmp y_index, r9
 		je end_of_image_remainder
@@ -144,15 +137,12 @@
 			mov [RDX] + (y_index+1)*r8 + (31+32*x_index+1), rax
 
 		; Increment x_index which means go right by 1 pixel
-		mov rax, x_index
-		add rax, 1
-		mov x_index, rax
-
+		mov x_index, x_index+1
 		loop x_single_pixel_loop_recalc
+
 		; Increment y_index which means go down by 1 row
-		mov rax, y_index
-		add rax, 1
-		mov y_index, rax
+		mov y_index, y_index+1
+
 		; Check if we are at the end of the image
 		cmp y_index, r9
 		je end_of_proc
