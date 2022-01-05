@@ -1,3 +1,5 @@
+.data
+	block_size dw 32
 .code
 	filter_low proc 
 		; arguments : const BYTE* input_image, BYTE* output_image, const int width, const int height
@@ -6,12 +8,12 @@
 		mov r12, 0 ; r12 is r12
 		
 		cmp r8, 32
-		jl end_of_image ; Skip simd for width < 32 pixels
+		jl calculate_width_remainder ; Skip simd for width < 32 pixels
 
 	; Use R8/32  iterations of simds for single line of the input image (leave reminder of the image for further calculation)
 	y_loop:
 		mov eax, r8
-		div 32
+		div block_size
 		mov ecx, eax
 		mov r11, 0 ; r11 is x_index
 	x_loop:
@@ -58,8 +60,8 @@
 	calculate_width_remainder:
 		; Calculate the remaining width of the image
 		mov eax, r8
-		div 32
-		mow r10, edx
+		div block_size
+		mov r10, edx
 		mov r10, r8-r10
 		mov ecx, r8
 		xor r12, r12
