@@ -9,7 +9,7 @@ void filter_high(const BYTE *input_image, BYTE *output_image, const int width, c
 	int nextZero = 2 * width - 1;
 	int lenmwidthmone = length - width - 1;
 
-	memset(output_image, 0, M * N); // whole image set to 0
+	memset(output_image, 0, (UINT32)width*height); // whole image set to 0
 	for (j = width + 1; j < lenmwidthmone; ++j) // start from the second row and end before the last row starts
 	{
 		if (j == nextZero)
