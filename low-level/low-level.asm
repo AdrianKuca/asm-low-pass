@@ -5,7 +5,7 @@
 		
 		cmp r8, 32
 		jl end_of_image ; Skip simd for width < 32 pixels
-		
+
 	; Use R8/32  iterations of simds for single line of the input image (leave reminder of the image for further calculation)
 	y_loop:
 		mov eax, r8
@@ -50,10 +50,10 @@
 		mov y_index, y_index+1
 		; Check if we are at the end of the image
 		cmp y_index, r9-2
-		je end_of_image
+		je calculate_width_remainder
 		jmp y_loop
 
-	end_of_image:
+	calculate_width_remainder:
 		; Calculate the remaining width of the image
 		mov eax, r8
 		div 32
@@ -90,10 +90,10 @@
 		
 		; Check if we are at the end of the image
 		cmp y_index, r9-2
-		je end_of_image_remainder
+		je recalculate_side_pixels
 		mov ecx, r8
 		jmp y_single_pixel_loop
-	end_of_image_remainder:
+	recalculate_side_pixels:
 		; Recalculate every 1st and 32th pixel of the image
 		mov y_index, 0
 	y_single_pixel_loop_recalc:
@@ -144,9 +144,9 @@
 
 		; Check if we are at the end of the image
 		cmp y_index, r9-2
-		je end_of_proc
+		je clear_edges
 		jmp y_single_pixel_loop_recalc
-	end_of_proc:
+	clear_edges:
 	ret
 	filter_low endp
 	
