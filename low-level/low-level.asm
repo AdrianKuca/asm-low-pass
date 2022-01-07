@@ -80,7 +80,8 @@
 
 		; Increment r11 which means go right by 32 pixels
 		inc r11
-		loop x_loop
+		dec rcx
+		jne x_loop
 
 		; Increment r12 which means go down by 1 row
 		inc r12
@@ -144,7 +145,7 @@
 			add rax, r11
 			inc rax
 			add rax, r14
-			mov offset rax, r15
+			mov [rax], r15
 			; Increment r11 which means go right by 1 pixel
 			inc r11
 		loop x_single_pixel_loop
@@ -218,7 +219,7 @@
 			inc rax
 			add rax, r10
 
-			mov offset rax, r15
+			mov [rax], r15
 
 		; Recalculate every last pixel of 32 bytes
 			mov rax , r12 ; y_index
@@ -229,7 +230,7 @@
 			mov rax, r11 ; x_index
 			mul block_size
 			add rax, r15 
-			add rax, block_size
+			add ax, block_size
 			dec rax
 			
 			; Add neighbouring pixels from the same row
@@ -271,11 +272,12 @@
 			inc rax
 			add rax, r10
 
-			mov offset rax, r15
+			mov [rax], r15
 
 		; Increment r11 which means go right by 32 pixels
 		inc r11
-		loop x_single_pixel_loop_recalc
+		dec ecx
+		jne x_single_pixel_loop_recalc
 
 		; Increment r12 which means go down by 1 row
 		inc r12
@@ -290,11 +292,12 @@
 	clear_edges:
 		xor r12, r12
 		mov rcx, r8
+		mov r15, 0
 
 	; Clear 0th line
 		mov rax, r14
 	x_loop_clear_first:
-		mov offset rax, 0
+		mov [rax], r15
 		inc rax
 		loop x_loop_clear_first
 
@@ -305,7 +308,7 @@
 		mul r8
 		add rax, r14
 	x_loop_clear_last:
-		mov offset rax, 0
+		mov [rax], r15
 		inc rax
 		loop x_loop_clear_last
 
@@ -314,10 +317,10 @@
 		mov rcx, r9
 		mov rax, r14
 	y_loop_clear:
-		mov offset rax, 0
+		mov [rax], r15
 		add rax, r8
 		dec rax
-		mov offset rax, 0
+		mov [rax], r15
 		inc rax
 		loop y_loop_clear
 
