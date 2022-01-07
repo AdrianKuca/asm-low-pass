@@ -168,40 +168,110 @@
 	x_single_pixel_loop_recalc:
 		; Recalculate every first pixel of 32 bytes
 			; Add neighbouring pixels from the same row
-			mov rax, [r13 + (r12+1)*r8 + ((32*r11)+1)]
-			add rax, [r13 + (r12+1)*r8 + ((32*r11))]
-			add rax, [r13 + (r12+1)*r8 + ((32*r11)+2)]
-			; Add neighbouring pixels from the next row
-			add rax, [r13 + (r12+2)*r8 + ((32*r11))]
-			add rax, [r13 + (r12+2)*r8 + ((32*r11)+1)]
-			add rax, [r13 + (r12+2)*r8 + ((32*r11)+2)]
-			; Add neighbouring pixels from the previous row
-			add rax, [r13 + (r12)*r8 + ((32*r11))]
-			add rax, [r13 + (r12)*r8 + ((32*r11)+1)]
-			add rax, [r13 + (r12)*r8 + ((32*r11)+2)]
-			; Divide by 9
-			mov rax, rax / 9
-			; Save result into [RDX+ (r11+1)]
-			mov [r14 + (r12+1)*r8 + (32*r11+1), rax]
-		; Recalculate every last pixel of 32 bytes
-			; Add neighbouring pixels from the same row
-			mov rax, [r13 + (r12+1)*r8 + (31+(32*r11)+1)]
-			add rax, [r13 + (r12+1)*r8 + (31+(32*r11))]
-			add rax, [r13 + (r12+1)*r8 + (31+(32*r11)+2)]
-			; Add neighbouring pixels from the next row
-			add rax, [r13 + (r12+2)*r8 + (31+(32*r11))]
-			add rax, [r13 + (r12+2)*r8 + (31+(32*r11)+1)]
-			add rax, [r13 + (r12+2)*r8 + (31+(32*r11)+2)]
-			; Add neighbouring pixels from the previous row
-			add rax, [r13 + (r12)*r8 + (31+(32*r11))]
-			add rax, [r13 + (r12)*r8 + (31+(32*r11)+1)]
-			add rax, [r13 + (r12)*r8 + (31+(32*r11)+2)]
-			; Divide by 9
-			mov rax, rax / 9
-			; Save result into [RDX+ (r11+1)]
-			mov [r14 + (r12+1)*r8 + (31+32*r11+1)], rax
+			mov rax , r12 ; y_index
+			mul r8
+			add rax, r13 ; start of image
+			mov r15, rax
 
-		; Increment r11 which means go right by 1 pixel
+			mov rax, r11 ; x_index
+			mul block_size
+			add rax, r15 
+			
+			mov r15, [rax]
+			inc rax
+			add r15, [rax]
+			inc rax
+			add r15, [rax]
+
+			; Add neighbouring pixels from the next row
+			add rax, r8
+			add r15, [rax]
+			dec rax
+			add r15, [rax]
+			dec rax
+			add r15, [rax]
+			
+			; Add neighbouring pixels from the next next row
+			add rax, r8
+			add r15, [rax]
+			inc rax
+			add r15, [rax]
+			inc rax
+			add r15, [rax]
+			
+			; Divide by 9
+			mov rax, r15
+			div divisor
+			mov r15, rax
+
+			; Save result into [r14 + (r12+1)*r8 + 32*r11+1]
+			mov rax, r12
+			inc rax
+			mul r8
+			add rax, r14
+			mov rax, r10
+
+			mov rax,r11
+			mul block_size
+			inc rax
+			add rax, r10
+
+			mov [rax], r15
+
+		; Recalculate every last pixel of 32 bytes
+			mov rax , r12 ; y_index
+			mul r8
+			add rax, r13 ; start of image
+			mov r15, rax
+
+			mov rax, r11 ; x_index
+			mul block_size
+			add rax, r15 
+			add rax, block_size
+			dec rax
+			
+			; Add neighbouring pixels from the same row
+			mov r15, [rax]
+			inc rax
+			add r15, [rax]
+			inc rax
+			add r15, [rax]
+			; Add neighbouring pixels from the next row
+			add rax, r8
+			add r15, [rax]
+			dec rax
+			add r15, [rax]
+			dec rax
+			add r15, [rax]
+			; Add neighbouring pixels from the previous row
+			add rax, r8
+			add r15, [rax]
+			inc rax
+			add r15, [rax]
+			inc rax
+			add r15, [rax]
+
+			; Divide by 9
+			mov rax, r15
+			div divisor
+			mov r15, rax
+
+			; Save result into [r14 + (r12+1)*r8 + (31+32*r11+1)]
+			
+			mov rax, r12
+			inc rax
+			mul r8
+			add rax, r14
+			mov rax, r10
+
+			mov rax,r11
+			mul block_size
+			inc rax
+			add rax, r10
+
+			mov [rax], r15
+
+		; Increment r11 which means go right by 32 pixels
 		inc r11
 		loop x_single_pixel_loop_recalc
 
