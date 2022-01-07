@@ -24,7 +24,7 @@
 		mov rax, r8
 		div block_size
 		mov rcx, rax
-		mov r11, 0 ; r11 is x_index
+		xor r11, r11
 	x_loop:
 		; Load 32 bytes from 3 next rows and sum them into ymm0
 		mov rax, r11
