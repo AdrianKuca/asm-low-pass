@@ -144,7 +144,7 @@
 			add rax, r11
 			inc rax
 			add rax, r14
-			mov [rax], r15
+			mov offset rax, r15
 			; Increment r11 which means go right by 1 pixel
 			inc r11
 		loop x_single_pixel_loop
@@ -216,7 +216,7 @@
 			inc rax
 			add rax, r10
 
-			mov [rax], r15
+			mov offset rax, r15
 
 		; Recalculate every last pixel of 32 bytes
 			mov rax , r12 ; y_index
@@ -269,7 +269,7 @@
 			inc rax
 			add rax, r10
 
-			mov [rax], r15
+			mov offset rax, r15
 
 		; Increment r11 which means go right by 32 pixels
 		inc r11
