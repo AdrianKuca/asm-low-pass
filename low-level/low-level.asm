@@ -163,8 +163,10 @@
 		; Recalculate every 1st and 32th pixel of the image
 		xor r12, r12
 	y_single_pixel_loop_recalc:
+		mov rax, r8
+		div block_size
+		mov rcx, rax
 		xor r11, r11
-		mov rcx, r8
 	x_single_pixel_loop_recalc:
 		; Recalculate every first pixel of 32 bytes
 			; Add neighbouring pixels from the same row
