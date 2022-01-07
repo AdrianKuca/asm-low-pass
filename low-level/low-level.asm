@@ -18,9 +18,9 @@
 		mov r11, 0 ; r11 is x_index
 	x_loop:
 		; Load 32 bytes from 3 next rows and sum them into ymm0
-		vmovntdqa ymm1, [RDX]+ r11*32 
-		vmovntdqa ymm2, [RDX]+ (r12*r8)+1 + r11*32 
-		vmovntdqa ymm3, [RDX]+ (r12*r8)+2 + r11*32 
+		vmovntdqa ymm1, [RDX + r11*32]
+		vmovntdqa ymm2, [RDX+ (r12*r8)+1 + r11*32 ]
+		vmovntdqa ymm3, [RDX+ (r12*r8)+2 + r11*32 ]
 		vpaddb ymm4, ymm1, ymm2
 		vpaddb ymm0, ymm3, ymm4
 		
@@ -44,7 +44,7 @@
 		vpmulhrsw ymm0, ymm0, ymm8
 
 		; Save ymm0 into next row of output image
-		vmovntdq [RDX] + (r12+1)*r8 +(r11+1)*32 , ymm0
+		vmovntdq [RDX + (r12+1)*r8 +(r11+1)*32 , ymm0]
 
 		; Increment r11 which means go right by 32 pixels
 		inc r11
@@ -70,21 +70,21 @@
 	x_single_pixel_loop:
 		; Recalculate single pixel from the remaining width of the image
 			; Add neighbouring pixels from the same row
-			mov rax, [RDX] + (r12+1)*r8 + (r10 + r11+1)
-			add rax, [RDX] + (r12+1)*r8 + (r10 + r11)
-			add rax, [RDX] + (r12+1)*r8 + (r10 + r11+2)
+			mov rax, [RDX + (r12+1)*r8 + (r10 + r11+1)]
+			add rax, [RDX + (r12+1)*r8 + (r10 + r11)]
+			add rax, [RDX + (r12+1)*r8 + (r10 + r11+2)]
 			; Add neighbouring pixels from the next row
-			add rax, [RDX] + (r12+2)*r8 + (r10 + r11)
-			add rax, [RDX] + (r12+2)*r8 + (r10 + r11+1)
-			add rax, [RDX] + (r12+2)*r8 + (r10 + r11+2)
+			add rax, [RDX + (r12+2)*r8 + (r10 + r11)]
+			add rax, [RDX + (r12+2)*r8 + (r10 + r11+1)]
+			add rax, [RDX + (r12+2)*r8 + (r10 + r11+2)]
 			; Add neighbouring pixels from the previous row
-			add rax, [RDX] + (r12)*r8 + (r10 + r11)
-			add rax, [RDX] + (r12)*r8 + (r10 + r11+1)
-			add rax, [RDX] + (r12)*r8 + (r10 + r11+2)
+			add rax, [RDX + (r12)*r8 + (r10 + r11)]
+			add rax, [RDX + (r12)*r8 + (r10 + r11+1)]
+			add rax, [RDX + (r12)*r8 + (r10 + r11+2)]
 			; Divide by 9
 			mov rax, rax / 9
-			; Save result into [RDX]+ (r11+1)
-			mov [RDX] + (r12+1)*r8 + (r11+1), rax
+			; Save result into [RDX+ (r11+1)]
+			mov [RDX + (r12+1)*r8 + (r11+1), rax]
 			; Increment r11 which means go right by 1 pixel
 			mov r11, r11+1
 		loop x_single_pixel_loop
@@ -106,38 +106,38 @@
 	x_single_pixel_loop_recalc:
 		; Recalculate every first pixel of 32 bytes
 			; Add neighbouring pixels from the same row
-			mov rax, [RDX] + (r12+1)*r8 + ((32*r11)+1)
-			add rax, [RDX] + (r12+1)*r8 + ((32*r11))
-			add rax, [RDX] + (r12+1)*r8 + ((32*r11)+2)
+			mov rax, [RDX + (r12+1)*r8 + ((32*r11)+1)]
+			add rax, [RDX + (r12+1)*r8 + ((32*r11))]
+			add rax, [RDX + (r12+1)*r8 + ((32*r11)+2)]
 			; Add neighbouring pixels from the next row
-			add rax, [RDX] + (r12+2)*r8 + ((32*r11))
-			add rax, [RDX] + (r12+2)*r8 + ((32*r11)+1)
-			add rax, [RDX] + (r12+2)*r8 + ((32*r11)+2)
+			add rax, [RDX + (r12+2)*r8 + ((32*r11))]
+			add rax, [RDX + (r12+2)*r8 + ((32*r11)+1)]
+			add rax, [RDX + (r12+2)*r8 + ((32*r11)+2)]
 			; Add neighbouring pixels from the previous row
-			add rax, [RDX] + (r12)*r8 + ((32*r11))
-			add rax, [RDX] + (r12)*r8 + ((32*r11)+1)
-			add rax, [RDX] + (r12)*r8 + ((32*r11)+2)
+			add rax, [RDX + (r12)*r8 + ((32*r11))]
+			add rax, [RDX + (r12)*r8 + ((32*r11)+1)]
+			add rax, [RDX + (r12)*r8 + ((32*r11)+2)]
 			; Divide by 9
 			mov rax, rax / 9
-			; Save result into [RDX]+ (r11+1)
-			mov [RDX] + (r12+1)*r8 + (32*r11+1), rax
+			; Save result into [RDX+ (r11+1)]
+			mov [RDX + (r12+1)*r8 + (32*r11+1), rax]
 		; Recalculate every last pixel of 32 bytes
 			; Add neighbouring pixels from the same row
-			mov rax, [RDX] + (r12+1)*r8 + (31+(32*r11)+1)
-			add rax, [RDX] + (r12+1)*r8 + (31+(32*r11))
-			add rax, [RDX] + (r12+1)*r8 + (31+(32*r11)+2)
+			mov rax, [RDX + (r12+1)*r8 + (31+(32*r11)+1)]
+			add rax, [RDX + (r12+1)*r8 + (31+(32*r11))]
+			add rax, [RDX + (r12+1)*r8 + (31+(32*r11)+2)]
 			; Add neighbouring pixels from the next row
-			add rax, [RDX] + (r12+2)*r8 + (31+(32*r11))
-			add rax, [RDX] + (r12+2)*r8 + (31+(32*r11)+1)
-			add rax, [RDX] + (r12+2)*r8 + (31+(32*r11)+2)
+			add rax, [RDX + (r12+2)*r8 + (31+(32*r11))]
+			add rax, [RDX + (r12+2)*r8 + (31+(32*r11)+1)]
+			add rax, [RDX + (r12+2)*r8 + (31+(32*r11)+2)]
 			; Add neighbouring pixels from the previous row
-			add rax, [RDX] + (r12)*r8 + (31+(32*r11))
-			add rax, [RDX] + (r12)*r8 + (31+(32*r11)+1)
-			add rax, [RDX] + (r12)*r8 + (31+(32*r11)+2)
+			add rax, [RDX + (r12)*r8 + (31+(32*r11))]
+			add rax, [RDX + (r12)*r8 + (31+(32*r11)+1)]
+			add rax, [RDX + (r12)*r8 + (31+(32*r11)+2)]
 			; Divide by 9
 			mov rax, rax / 9
-			; Save result into [RDX]+ (r11+1)
-			mov [RDX] + (r12+1)*r8 + (31+32*r11+1), rax
+			; Save result into [RDX+ (r11+1)]
+			mov [RDX + (r12+1)*r8 + (31+32*r11+1), rax]
 
 		; Increment r11 which means go right by 1 pixel
 		inc r11
@@ -156,14 +156,14 @@
 		mov ecx, r8
 	x_loop_clear_first:
 		; clear 0th line
-		mov [RDX] + (r11), 0
+		mov [RDX + (r11), 0]
 		inc r11
 		loop x_loop_clear_first
 		xor r11, r11
 		mov ecx, r8
 	x_loop_clear_last:
 		; clear last line
-		mov [RDX] + (r9-1)*r8 + (r11), 0
+		mov [RDX + (r9-1)*r8 + (r11), 0]
 		inc r11
 		loop x_loop_clear_last
 		xor r11, r11
@@ -171,8 +171,8 @@
 		
 	y_loop_clear:
 		; clear first and last column
-		mov [RDX] + r12*r8, 0
-		mov [RDX] + r12*r8 + r8-1, 0
+		mov [RDX + r12*r8, 0]
+		mov [RDX + r12*r8 + r8-1, 0]
 		inc r12
 		loop y_loop_clear
 
