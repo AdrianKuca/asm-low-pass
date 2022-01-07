@@ -286,36 +286,41 @@
 		cmp r12, rax
 		je clear_edges
 		jmp y_single_pixel_loop_recalc
+
 	clear_edges:
 		xor r12, r12
-		xor r11, r11
 		mov rcx, r8
-	x_loop_clear_first:
-		; clear 0th line
+
+	; Clear 0th line
 		mov rax, r14
-		add rax, r11
-		mov OFFSET rax, 0
-		inc r11
+	x_loop_clear_first:
+		mov offset rax, 0
+		inc rax
 		loop x_loop_clear_first
-		xor r11, r11
+
+	; Clear last line [r14 + (r9-1)*r8]
 		mov rcx, r8
+		mov rax, r9	
+		dec rax
+		mul r8
+		add rax, r14
 	x_loop_clear_last:
-		; clear last line
-		mov [r14 + (r9-1)*r8 + (r11)], 0
-		inc r11
+		mov offset rax, 0
+		inc rax
 		loop x_loop_clear_last
+
+	; Clear first and last column
 		xor r11, r11
 		mov rcx, r9
-		
+		mov rax, r14
 	y_loop_clear:
-		; clear first and last column
-		mov [r14 + r12*r8], 0
-		mov [r14 + r12*r8 + r8-1], 0
-		inc r12
+		mov offset rax, 0
+		add rax, r8
+		dec rax
+		mov offset rax, 0
+		inc rax
 		loop y_loop_clear
 
 		ret
 	filter_low endp
-	
-
 end
