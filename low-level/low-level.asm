@@ -5,11 +5,17 @@
 	filter_low proc 
 		; arguments : const BYTE* input_image, BYTE* output_image, const int width, const int height
 		; RCX input_image; RDX output_image; R8 width; R9 height
+
+		; REGISTERS
+		; r8 is width
+		; r9 is height
+		; r10 helps in calculations
 		mov r11, 0 ; r11 is x_index
 		mov r12, 0 ; r12 is y_index
 		mov r13, RCX ; r13 is input_image address
 		mov r14, RDX ; r14 is output_image address
-		
+		; r15 helps in calculations
+
 		cmp r8, 32
 		jl calculate_width_remainder ; Skip simd for width < 32 pixels
 
