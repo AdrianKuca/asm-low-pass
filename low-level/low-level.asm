@@ -86,12 +86,11 @@
 		jmp y_loop
 
 	calculate_width_remainder:
-		; Calculate the remaining width of the image
+		; Calculate the remaining width of the image in pixels [width - (width % 32)]
 		mov rax, r8
 		div block_size
-		mov r10, rdx
 		mov rax, r8
-		sub rax, r10
+		sub rax, rdx
 		mov r10, rax
 		mov rcx, r8
 		xor r12, r12
@@ -100,21 +99,46 @@
 	x_single_pixel_loop:
 		; Recalculate single pixel from the remaining width of the image
 			; Add neighbouring pixels from the same row
-			mov rax, [r13 + (r12+1)*r8 + (r10 + r11+1)]
-			add rax, [r13 + (r12+1)*r8 + (r10 + r11)]
-			add rax, [r13 + (r12+1)*r8 + (r10 + r11+2)]
+			mov rax , r12 ; y_index
+			mul r8
+			add rax, r13 ; start of image
+			add rax, r11 ; x _index
+			add rax, r10 ; start of reminder
+			mov r15, [rax]
+			inc rax
+			add r15, [rax]
+			inc rax
+			add r15, [rax]
+
 			; Add neighbouring pixels from the next row
-			add rax, [r13 + (r12+2)*r8 + (r10 + r11)]
-			add rax, [r13 + (r12+2)*r8 + (r10 + r11+1)]
-			add rax, [r13 + (r12+2)*r8 + (r10 + r11+2)]
-			; Add neighbouring pixels from the previous row
-			add rax, [r13 + (r12)*r8 + (r10 + r11)]
-			add rax, [r13 + (r12)*r8 + (r10 + r11+1)]
-			add rax, [r13 + (r12)*r8 + (r10 + r11+2)]
+			add rax, r8
+			add r15, [rax]
+			dec rax
+			add r15, [rax]
+			dec rax
+			add r15, [rax]
+
+			; Add neighbouring pixels from the next next row
+			add rax, r8
+			add r15, [rax]
+			inc rax
+			add r15, [rax]
+			inc rax
+			add r15, [rax]
+		
 			; Divide by 9
-			mov rax, rax / 9
-			; Save result into [RDX+ (r11+1)]
-			mov [r14 + (r12+1)*r8 + (r11+1), rax]
+			mov rax, r15
+			div divisor
+			mov r15, rax
+			
+			; Save result into [r14 + (r12+1)*r8 + (r11+1)]
+			mov rax, r12
+			inc rax
+			mul r8
+			add rax, r11
+			inc rax
+			add rax, r14
+			mov [rax], r15
 			; Increment r11 which means go right by 1 pixel
 			inc r11
 		loop x_single_pixel_loop
@@ -191,8 +215,8 @@
 	x_loop_clear_first:
 		; clear 0th line
 		mov rax, r14
-		add r11
-		mov [rax], 0
+		add rax, r11
+		mov OFFSET rax, 0
 		inc r11
 		loop x_loop_clear_first
 		xor r11, r11
