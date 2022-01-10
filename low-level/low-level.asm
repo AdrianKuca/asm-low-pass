@@ -1,6 +1,6 @@
 .data
 	divisor dw 9
-	block_size dw 32
+	block_size dq 32
 .code
 	filter_low proc 
 		; arguments : const BYTE* input_image, BYTE* output_image, const int width, const int height
@@ -22,6 +22,7 @@
 	; Use R8/32  iterations of simds for single line of the input image (leave reminder of the image for further calculation)
 	y_loop:
 		mov rax, r8
+		xor rdx, rdx
 		div block_size
 		mov rcx, rax
 		xor r11, r11
@@ -61,9 +62,11 @@
 		vpaddb ymm0, ymm7, ymm6
 		
 		; Divide ymm0 by 9
-		mov rax, 32768
-		div divisor
-		vpbroadcastw ymm8, rax
+		mov rax, 32768.0
+		movq xmm0, rax
+		movq xmm1, xmmword divisor
+		divsd xmm0, xmm1
+		vpbroadcastss ymm8, rax
 		vpmulhrsw ymm0, ymm0, ymm8
 
 		; Save ymm0 into next row of output image [r14 + (r12+1)*r8 +(r11+1)*32]
@@ -95,6 +98,7 @@
 	calculate_width_remainder:
 		; Calculate the remaining width of the image in pixels [width - (width % 32)]
 		mov rax, r8
+		xor rdx, rdx
 		div block_size
 		mov rax, r8
 		sub rax, rdx
@@ -135,6 +139,7 @@
 		
 			; Divide by 9
 			mov rax, r15
+			xor rdx, rdx
 			div divisor
 			mov r15, rax
 			
@@ -165,6 +170,7 @@
 		xor r12, r12
 	y_single_pixel_loop_recalc:
 		mov rax, r8
+		xor rdx, rdx
 		div block_size
 		mov rcx, rax
 		xor r11, r11
@@ -204,6 +210,7 @@
 			
 			; Divide by 9
 			mov rax, r15
+			xor rdx, rdx
 			div divisor
 			mov r15, rax
 
@@ -230,7 +237,7 @@
 			mov rax, r11 ; x_index
 			mul block_size
 			add rax, r15 
-			add ax, block_size
+			add rax, block_size
 			dec rax
 			
 			; Add neighbouring pixels from the same row
@@ -256,6 +263,7 @@
 
 			; Divide by 9
 			mov rax, r15
+			xor rdx, rdx
 			div divisor
 			mov r15, rax
 
