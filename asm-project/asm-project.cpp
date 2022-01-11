@@ -7,8 +7,8 @@ using namespace std;
 typedef int(_stdcall *Filter_Low)(const BYTE *input_image, BYTE *output_image, const int width, const int height);
 HINSTANCE dllHandle = NULL;
 
-#define N 200
-#define M 100
+#define WIDTH 200
+#define HEIGHT 100
 
 int main()
 {
@@ -16,19 +16,23 @@ int main()
 	Filter_Low filter_low = (Filter_Low)GetProcAddress(dllHandle, "filter_low");
 
 	// Load image
-	BYTE *input_image = new BYTE[M * N];
-	for (int i = 0, k = 0; i < N * M; ++i)
+	BYTE *input_image = new BYTE[HEIGHT * WIDTH];
+	for (int i = 0, k = 0; i < WIDTH * HEIGHT; ++i)
 		input_image[i] = k++ % 255;
 
+	save_image("input", input_image, WIDTH, HEIGHT);
+
 	// Process image high level
-	BYTE *output_image_high = new BYTE[M * N];
-	filter_high(input_image, output_image_high, N, M);
+	BYTE *output_image_high = new BYTE[HEIGHT * WIDTH];
+	filter_high(input_image, output_image_high, WIDTH, HEIGHT);
+	save_image("high", output_image_high, WIDTH, HEIGHT);
 
 	// Process image low level
-	BYTE *output_image_low = new BYTE[M * N];
-	filter_low(input_image, output_image_low, N, M);
+	BYTE *output_image_low = new BYTE[HEIGHT * WIDTH];
+	filter_low(input_image, output_image_low, WIDTH, HEIGHT);
+	save_image("low", output_image_low, WIDTH, HEIGHT);
 
-	if (compare_images(output_image_high, output_image_low, N, M))
+	if (compare_images(output_image_high, output_image_low, WIDTH, HEIGHT))
 	{
 		cout << "Comparision test OK!\n";
 	}
@@ -44,14 +48,14 @@ int main()
 	cout << "Starting high level performance test...\n";
 	start_time = clock();
 	for (int i = 0; i < iterations; ++i)
-		filter_high(input_image, output_image_low, N, M);
+		filter_high(input_image, output_image_low, WIDTH, HEIGHT);
 	end_time = clock();
 	cout << "High level function execution time = " << ((float)(end_time - start_time) / CLOCKS_PER_SEC) << " s";
 
 	cout << "Starting low level performance test...\n";
 	start_time = clock();
 	for (int i = 0; i < iterations; ++i)
-		filter_low(input_image, output_image_low, N, M);
+		filter_low(input_image, output_image_low, WIDTH, HEIGHT);
 	end_time = clock();
 	cout << "Low level function execution time = " << ((float)(end_time - start_time) / CLOCKS_PER_SEC) << " s";
 
