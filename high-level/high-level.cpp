@@ -9,7 +9,7 @@ void filter_high(const BYTE *input_image, BYTE *output_image, const int width, c
 	int nextZero = 2 * width - 1;
 	int lenmwidthmone = length - width - 1;
 
-	memset(output_image, 0, (UINT32)width*height); // whole image set to 0
+	memset(output_image, 0, length); // whole image set to 0
 	for (j = width + 1; j < lenmwidthmone; ++j) // start from the second row and end before the last row starts
 	{
 		if (j == nextZero)
@@ -24,15 +24,15 @@ void filter_high(const BYTE *input_image, BYTE *output_image, const int width, c
 			sum = 0;
 
 			//center
-			sum += 1 / 9 * input_image[j];
+			sum += input_image[j] / 9.;
 			int jmwidth = j - width;
 			int jpwidth = j + width;
 
 			// sides
-			sum += 1 / 9 * (input_image[j - 1] + input_image[j + 1] + input_image[jmwidth] + input_image[jpwidth]);
+			sum +=(input_image[j - 1] + input_image[j + 1] + input_image[jmwidth] + input_image[jpwidth])/9.;
 
 			//diagonals
-			sum += 1 / 9 * (input_image[jmwidth - 1] + input_image[jmwidth + 1] + input_image[jpwidth - 1] + input_image[jpwidth + 1]);
+			sum += (input_image[jmwidth - 1] + input_image[jmwidth + 1] + input_image[jpwidth - 1] + input_image[jpwidth + 1])/9.;
 
 			output_image[j] = (BYTE)sum;
 		}
