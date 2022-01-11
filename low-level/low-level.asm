@@ -1,6 +1,8 @@
 .data
 	divisor dw 9
 	block_size dq 32
+	magic dq 32768.0
+	f_divisor dq 9.
 .code
 	filter_low proc 
 		; arguments : const BYTE* input_image, BYTE* output_image, const int width, const int height
@@ -62,11 +64,10 @@
 		vpaddb ymm0, ymm7, ymm6
 		
 		; Divide ymm0 by 9
-		mov rax, 32768.0
-		movq xmm0, rax
-		movq xmm1, xmmword divisor
+		movq xmm0, magic
+		movq xmm1, f_divisor
 		divsd xmm0, xmm1
-		vpbroadcastss ymm8, rax
+		VPBROADCASTB  ymm8, xmm0
 		vpmulhrsw ymm0, ymm0, ymm8
 
 		; Save ymm0 into next row of output image [r14 + (r12+1)*r8 +(r11+1)*32]
@@ -79,7 +80,7 @@
 		mul r8
 		add rax, r15
 		add rax, r14
-		vmovntdq ymmword ptr [rax], ymm0
+		vmovdqu ymmword ptr [rax], ymm0
 
 		; Increment r11 which means go right by 32 pixels
 		inc r11
@@ -219,9 +220,9 @@
 			inc rax
 			mul r8
 			add rax, r14
-			mov rax, r10
+			mov r10, rax
 
-			mov rax,r11
+			mov rax, r11
 			mul block_size
 			inc rax
 			add rax, r10
