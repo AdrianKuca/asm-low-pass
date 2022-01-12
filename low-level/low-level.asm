@@ -3,6 +3,7 @@
 	block_size dq 32
 	magic dq 32768.0
 	f_divisor dq 9.
+	bit_shift dq 1
 .code
 	filter_low proc 
 		; arguments : const BYTE* input_image, BYTE* output_image, const int width, const int height
@@ -21,6 +22,10 @@
 		cmp r8, 32
 		jl calculate_width_remainder ; Skip simd for width < 32 pixels
 
+		; Prepare division by 8 which is roughly div by 9 in this realm xd
+		movq xmm0, bit_shift
+		vpbroadcastq ymm9, xmm0
+
 	; Use R8/32  iterations of simds for single line of the input image (leave reminder of the image for further calculation)
 	y_loop:
 		mov rax, r8
@@ -29,7 +34,7 @@
 		mov rcx, rax
 		xor r11, r11
 	x_loop:
-		; Load 32 bytes from 3 next rows and sum them into ymm0
+		; Load 32 bytes from 3 next rows, divide them by 8 and sum them into ymm0
 		mov rax, r11
 		mul block_size
 		mov r15, rax
@@ -37,38 +42,35 @@
 		mul r8
 		add rax, r15
 		add rax, r13
-		vmovdqu  ymm1, ymmword ptr [rax] ; r13 + r11*32 + r12*r8
+		vmovdqu  ymm4, ymmword ptr [rax] ; r13 + r11*32 + r12*r8
+		vpsrlvq ymm0, ymm4, ymm9
 
 		add rax, r8
-		vmovdqu ymm2, ymmword ptr [rax] ; r13 + r11*32 + (r12+1)*r8
+		vmovdqu ymm5, ymmword ptr [rax] ; r13 + r11*32 + (r12+1)*r8
+		vpsrlvw ymm2, ymm5, ymm9
 
 		add rax, r8
-		vmovdqu ymm3, ymmword ptr [rax] ; r13 + r11*32 + (r12+2)*r8)
+		vmovdqu ymm6, ymmword ptr [rax] ; r13 + r11*32 + (r12+2)*r8)
+		vpsrlvw ymm3, ymm6, ymm9
 
 		vpaddb ymm4, ymm1, ymm2
 		vpaddb ymm0, ymm3, ymm4
 		
 		
-		; Shift right and sum
+		
+		; Shift pixels right and sum
 		vpsrldq ymm4, ymm1, 1
 		vpsrldq ymm5, ymm2, 1
 		vpsrldq ymm6, ymm3, 1
 		vpaddb ymm7, ymm4, ymm5
 		vpaddb ymm0, ymm7, ymm6
 
-		; Shift left and sum
+		; Shift pixels left and sum
 		vpslldq ymm4, ymm1, 1
 		vpslldq ymm5, ymm2, 1
 		vpslldq ymm6, ymm3, 1
 		vpaddb ymm7, ymm4, ymm5
 		vpaddb ymm0, ymm7, ymm6
-		
-		; Divide ymm0 by 9
-		movq xmm0, magic
-		movq xmm1, f_divisor
-		divsd xmm0, xmm1
-		VPBROADCASTB  ymm8, xmm0
-		vpmulhrsw ymm0, ymm0, ymm8
 
 		; Save ymm0 into next row of output image [r14 + (r12+1)*r8 +(r11+1)*32]
 		mov rax, r11
@@ -97,6 +99,7 @@
 		jmp y_loop
 
 	calculate_width_remainder:
+		ret
 		; Calculate the remaining width of the image in pixels [width - (width % 32)]
 		mov rax, r8
 		xor rdx, rdx
