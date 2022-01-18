@@ -105,16 +105,21 @@
 		jmp y_loop
 
 	calculate_width_remainder:
-		; Calculate the remaining width of the image in pixels [width - (width % 32)]
+		; Calculate the remaining width of the image in pixels [width - (width % 32)] and put it in r10
 		mov rax, r8
 		xor rdx, rdx
 		div block_size
 		mov rax, r8
 		sub rax, rdx
 		mov r10, rax
-		mov rcx, r8
+		mov rcx, rdx
 		xor r12, r12
 	y_single_pixel_loop:
+		mov rax, r8
+		xor rdx, rdx
+		div block_size
+		mov rcx, rdx ; how many pixels till the end of line
+
 		xor r11, r11
 	x_single_pixel_loop:
 		; Recalculate single pixel from the remaining width of the image
@@ -124,42 +129,37 @@
 			add rax, r13 ; start of image
 			add rax, r11 ; x _index
 			add rax, r10 ; start of reminder
-			mov r15, [rax]
+			mov r15b, [rax]
 			inc rax
-			add r15, [rax]
+			add r15b, [rax]
 			inc rax
-			add r15, [rax]
+			add r15b, [rax]
 
 			; Add neighbouring pixels from the next row
 			add rax, r8
-			add r15, [rax]
+			add r15b, [rax]
 			dec rax
-			add r15, [rax]
+			add r15b, [rax]
 			dec rax
-			add r15, [rax]
+			add r15b, [rax]
 
 			; Add neighbouring pixels from the next next row
 			add rax, r8
-			add r15, [rax]
+			add r15b, [rax]
 			inc rax
-			add r15, [rax]
+			add r15b, [rax]
 			inc rax
-			add r15, [rax]
-		
-			; Divide by 9
-			mov rax, r15
-			xor rdx, rdx
-			div divisor
-			mov r15, rax
+			add r15b, [rax]
 			
-			; Save result into [r14 + (r12+1)*r8 + (r11+1)]
+			; Save result into [r14 + (r12+1)*r8 + (r11+1+r10)]
 			mov rax, r12
 			inc rax
 			mul r8
 			add rax, r11
+			add rax, r10
 			inc rax
 			add rax, r14
-			mov [rax], r15
+			mov [rax], r15b
 			; Increment r11 which means go right by 1 pixel
 			inc r11
 		loop x_single_pixel_loop
@@ -172,7 +172,6 @@
 		sub rax, 2
 		cmp r12, rax
 		je recalculate_side_pixels
-		mov rcx, r8
 		jmp y_single_pixel_loop
 	recalculate_side_pixels:
 		; Recalculate every 1st and 32th pixel of the image
