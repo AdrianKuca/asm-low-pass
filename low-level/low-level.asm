@@ -174,16 +174,16 @@
 		je recalculate_side_pixels
 		jmp y_single_pixel_loop
 	recalculate_side_pixels:
-		; Recalculate every 1st and 32th pixel of the image
+		; Recalculate every 1st and 16th pixel of the image
 		xor r12, r12
 	y_single_pixel_loop_recalc:
 		mov rax, r8
 		xor rdx, rdx
-		div block_size
+		div half_block_size
 		mov rcx, rax
 		xor r11, r11
 	x_single_pixel_loop_recalc:
-		; Recalculate every first pixel of 32 bytes
+		; Recalculate every first pixel of 16 bytes
 			; Add neighbouring pixels from the same row
 			mov rax , r12 ; y_index
 			mul r8
@@ -191,7 +191,7 @@
 			mov r15, rax
 
 			mov rax, r11 ; x_index
-			mul block_size
+			mul half_block_size
 			add rax, r15 
 			
 			mov r15b, [rax]
@@ -216,7 +216,7 @@
 			inc rax
 			add r15b, [rax]
 		
-			; Save result into [r14 + (r12+1)*r8 + 32*r11+1]
+			; Save result into [r14 + (r12+1)*r8 + 16*r11+1]
 			mov rax, r12
 			inc rax
 			mul r8
@@ -224,22 +224,21 @@
 			mov r10, rax
 
 			mov rax, r11
-			mul block_size
-			inc rax
+			mul half_block_size
 			add rax, r10
 
-			mov [rax], r15b
+			;mov [rax], r15b
 
-		; Recalculate every last pixel of 32 bytes
+		; Recalculate every last pixel of 16 bytes
 			mov rax , r12 ; y_index
 			mul r8
 			add rax, r13 ; start of image
 			mov r15, rax
 
 			mov rax, r11 ; x_index
-			mul block_size
+			mul half_block_size
 			add rax, r15 
-			add rax, block_size
+			add rax, half_block_size
 			dec rax
 			
 			; Add neighbouring pixels from the same row
@@ -263,7 +262,7 @@
 			inc rax
 			add r15b, [rax]
 
-			; Save result into [r14 + (r12+1)*r8 + (31+32*r11+1)]
+			; Save result into [r14 + (r12+1)*r8 + (15+16*r11+1)]
 			
 			mov rax, r12
 			inc rax
@@ -272,15 +271,15 @@
 			mov rax, r10
 
 			mov rax,r11
-			mul block_size
+			mul half_block_size
 			inc rax
-			add rax, block_size
+			add rax, half_block_size
 			dec rax
 			add rax, r10
 
 			mov [rax], r15b
 
-		; Increment r11 which means go right by 32 pixels
+		; Increment r11 which means go right by 16 pixels
 		inc r11
 		dec ecx
 		jne x_single_pixel_loop_recalc
