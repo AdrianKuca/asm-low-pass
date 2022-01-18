@@ -103,7 +103,6 @@
 		cmp r12, rax
 		je calculate_width_remainder
 		jmp y_loop
-
 	calculate_width_remainder:
 		; Calculate the remaining width of the image in pixels [width - (width % 32)] and put it in r10
 		mov rax, r8
@@ -215,13 +214,7 @@
 			add r15, [rax]
 			inc rax
 			add r15, [rax]
-			
-			; Divide by 9
-			mov rax, r15
-			xor rdx, rdx
-			div divisor
-			mov r15, rax
-
+		
 			; Save result into [r14 + (r12+1)*r8 + 32*r11+1]
 			mov rax, r12
 			inc rax
@@ -268,12 +261,6 @@
 			add r15, [rax]
 			inc rax
 			add r15, [rax]
-
-			; Divide by 9
-			mov rax, r15
-			xor rdx, rdx
-			div divisor
-			mov r15, rax
 
 			; Save result into [r14 + (r12+1)*r8 + (31+32*r11+1)]
 			
