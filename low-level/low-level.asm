@@ -42,7 +42,7 @@
 		mov rcx, rax
 		xor r11, r11
 	x_loop:
-		; Load 32 bytes from 3 next rows, divide them by 8 and sum them into ymm0
+		; Load 32 bytes from 3 next rows, sum them into ymm0
 		mov rax, r11
 		mul block_size
 		mov r15, rax
@@ -50,16 +50,11 @@
 		mul r8
 		add rax, r15
 		add rax, r13
-		vmovdqu  ymm4, ymmword ptr [rax] ; r13 + r11*32 + r12*r8
-		vpsrlvq ymm0, ymm4, ymm9
-
+		vmovdqu  ymm1, ymmword ptr [rax] ; r13 + r11*32 + r12*r8
 		add rax, r8
-		vmovdqu ymm5, ymmword ptr [rax] ; r13 + r11*32 + (r12+1)*r8
-		vpsrlvw ymm2, ymm5, ymm9
-
+		vmovdqu ymm2, ymmword ptr [rax] ; r13 + r11*32 + (r12+1)*r8
 		add rax, r8
-		vmovdqu ymm6, ymmword ptr [rax] ; r13 + r11*32 + (r12+2)*r8)
-		vpsrlvw ymm3, ymm6, ymm9
+		vmovdqu ymm3, ymmword ptr [rax] ; r13 + r11*32 + (r12+2)*r8)
 
 		vpaddb ymm4, ymm1, ymm2
 		vpaddb ymm0, ymm3, ymm4
@@ -67,18 +62,22 @@
 		
 		
 		; Shift pixels right and sum
-		vpsrldq ymm4, ymm1, 1
-		vpsrldq ymm5, ymm2, 1
-		vpsrldq ymm6, ymm3, 1
+		vpsrlq ymm4, ymm1, 1
+		vpsrlq ymm5, ymm2, 1
+		vpsrlq ymm6, ymm3, 1
 		vpaddb ymm7, ymm4, ymm5
 		vpaddb ymm0, ymm7, ymm6
 
 		; Shift pixels left and sum
-		vpslldq ymm4, ymm1, 1
-		vpslldq ymm5, ymm2, 1
-		vpslldq ymm6, ymm3, 1
+		vpsllq ymm4, ymm1, 1
+		vpsllq ymm5, ymm2, 1
+		vpsllq ymm6, ymm3, 1
 		vpaddb ymm7, ymm4, ymm5
 		vpaddb ymm0, ymm7, ymm6
+		
+		; Add some brightness which was lost during division
+		vpaddb ymm0, ymm0, ymm9
+		vpaddb ymm0, ymm0, ymm9
 
 		; Save ymm0 into next row of output image [r14 + (r12+1)*r8 +(r11+1)*32]
 		mov rax, r11
