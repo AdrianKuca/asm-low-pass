@@ -105,7 +105,6 @@
 		jmp y_loop
 
 	calculate_width_remainder:
-		ret
 		; Calculate the remaining width of the image in pixels [width - (width % 32)]
 		mov rax, r8
 		xor rdx, rdx
