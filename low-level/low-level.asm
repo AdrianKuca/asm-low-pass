@@ -1,6 +1,8 @@
 .data
+	zero dq 0
 	divisor db 9
 	block_size dq 32
+	half_block_size dq 16
 .code
 	filter_low proc 
 		; arguments : const BYTE* input_image, BYTE* output_image, const int width, const int height
@@ -43,6 +45,7 @@
 		xor r11, r11
 	x_loop:
 		; Load 32 bytes from 3 next rows, sum them into ymm0
+		vpbroadcastq ymm0, zero
 		mov rax, r11
 		mul block_size
 		mov r15, rax
@@ -58,28 +61,26 @@
 
 		vpaddb ymm4, ymm1, ymm2
 		vpaddb ymm0, ymm3, ymm4
-		
+		vmovdqu ymm9, ymm0
 		
 		
 		; Shift pixels right and sum
-		vpsrlq ymm4, ymm1, 1
-		vpsrlq ymm5, ymm2, 1
-		vpsrlq ymm6, ymm3, 1
+		vpsrldq ymm4, ymm1, 1
+		vpsrldq ymm5, ymm2, 1
+		vpsrldq ymm6, ymm3, 1
 		vpaddb ymm7, ymm4, ymm5
 		vpaddb ymm0, ymm7, ymm6
+		vpaddb ymm9, ymm0, ymm9
 
 		; Shift pixels left and sum
-		vpsllq ymm4, ymm1, 1
-		vpsllq ymm5, ymm2, 1
-		vpsllq ymm6, ymm3, 1
+		vpslldq ymm4, ymm1, 1
+		vpslldq ymm5, ymm2, 1
+		vpslldq ymm6, ymm3, 1
 		vpaddb ymm7, ymm4, ymm5
 		vpaddb ymm0, ymm7, ymm6
-		
-		; Add some brightness which was lost during division
-		vpaddb ymm0, ymm0, ymm9
-		vpaddb ymm0, ymm0, ymm9
+		vpaddb ymm9, ymm0, ymm9
 
-		; Save ymm0 into next row of output image [r14 + (r12+1)*r8 +(r11)*32]
+		; Save ymm9 into next row of output image [r14 + (r12+1)*r8 +(r11)*32]
 		mov rax, r11
 		mul block_size
 		mov r15, rax
@@ -88,7 +89,7 @@
 		mul r8
 		add rax, r15
 		add rax, r14
-		vmovdqu ymmword ptr [rax], ymm0
+		vmovdqu ymmword ptr [rax], ymm9
 
 		; Increment r11 which means go right by 32 pixels
 		inc r11
