@@ -1,9 +1,6 @@
 .data
-	divisor dw 9
+	divisor db 9
 	block_size dq 32
-	magic dq 32768.0
-	f_divisor dq 9.
-	bit_shift dq 1
 .code
 	filter_low proc 
 		; arguments : const BYTE* input_image, BYTE* output_image, const int width, const int height
