@@ -4,7 +4,7 @@
 #include "utils.h"
 using namespace std;
 
-typedef int(_stdcall *Filter_Low)(const BYTE *input_image, BYTE *output_image, const int width, const int height);
+typedef int(_stdcall *Filter_Low)(BYTE *input_image, BYTE *output_image, const int width, const int height);
 HINSTANCE dllHandle = NULL;
 
 #define WIDTH 200
@@ -27,7 +27,7 @@ int main()
 	filter_high(input_image, output_image_high, WIDTH, HEIGHT);
 	save_image("high", output_image_high, WIDTH, HEIGHT);
 
-	// Process image low level
+	// Process image low level, CHANGES INPUT IMAGE IN PLACE
 	BYTE *output_image_low = new BYTE[HEIGHT * WIDTH];
 	filter_low(input_image, output_image_low, WIDTH, HEIGHT);
 	save_image("low", output_image_low, WIDTH, HEIGHT);
