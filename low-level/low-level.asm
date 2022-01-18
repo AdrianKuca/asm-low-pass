@@ -79,9 +79,8 @@
 		vpaddb ymm0, ymm0, ymm9
 		vpaddb ymm0, ymm0, ymm9
 
-		; Save ymm0 into next row of output image [r14 + (r12+1)*r8 +(r11+1)*32]
+		; Save ymm0 into next row of output image [r14 + (r12+1)*r8 +(r11)*32]
 		mov rax, r11
-		inc rax
 		mul block_size
 		mov r15, rax
 		mov rax, r12
