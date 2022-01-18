@@ -33,7 +33,7 @@
 		div divisor
 		mov [r15], al
 		loop i_loop
-
+		
 	; Use R8/32  iterations of simds for single line of the input image (leave reminder of the image for further calculation)
 	y_loop:
 		mov rax, r8
@@ -193,27 +193,27 @@
 			mul block_size
 			add rax, r15 
 			
-			mov r15, [rax]
+			mov r15b, [rax]
 			inc rax
-			add r15, [rax]
+			add r15b, [rax]
 			inc rax
-			add r15, [rax]
+			add r15b, [rax]
 
 			; Add neighbouring pixels from the next row
 			add rax, r8
-			add r15, [rax]
+			add r15b, [rax]
 			dec rax
-			add r15, [rax]
+			add r15b, [rax]
 			dec rax
-			add r15, [rax]
+			add r15b, [rax]
 			
 			; Add neighbouring pixels from the next next row
 			add rax, r8
-			add r15, [rax]
+			add r15b, [rax]
 			inc rax
-			add r15, [rax]
+			add r15b, [rax]
 			inc rax
-			add r15, [rax]
+			add r15b, [rax]
 		
 			; Save result into [r14 + (r12+1)*r8 + 32*r11+1]
 			mov rax, r12
@@ -227,7 +227,7 @@
 			inc rax
 			add rax, r10
 
-			mov [rax], r15
+			mov [rax], r15b
 
 		; Recalculate every last pixel of 32 bytes
 			mov rax , r12 ; y_index
@@ -242,25 +242,25 @@
 			dec rax
 			
 			; Add neighbouring pixels from the same row
-			mov r15, [rax]
+			mov r15b, [rax]
 			inc rax
-			add r15, [rax]
+			add r15b, [rax]
 			inc rax
-			add r15, [rax]
+			add r15b, [rax]
 			; Add neighbouring pixels from the next row
 			add rax, r8
-			add r15, [rax]
+			add r15b, [rax]
 			dec rax
-			add r15, [rax]
+			add r15b, [rax]
 			dec rax
-			add r15, [rax]
+			add r15b, [rax]
 			; Add neighbouring pixels from the previous row
 			add rax, r8
-			add r15, [rax]
+			add r15b, [rax]
 			inc rax
-			add r15, [rax]
+			add r15b, [rax]
 			inc rax
-			add r15, [rax]
+			add r15b, [rax]
 
 			; Save result into [r14 + (r12+1)*r8 + (31+32*r11+1)]
 			
@@ -273,9 +273,11 @@
 			mov rax,r11
 			mul block_size
 			inc rax
+			add rax, block_size
+			dec rax
 			add rax, r10
 
-			mov [rax], r15
+			mov [rax], r15b
 
 		; Increment r11 which means go right by 32 pixels
 		inc r11
@@ -295,12 +297,12 @@
 	clear_edges:
 		xor r12, r12
 		mov rcx, r8
-		mov r15, 0
+		mov r15b, 0
 
 	; Clear 0th line
 		mov rax, r14
 	x_loop_clear_first:
-		mov [rax], r15
+		mov [rax], r15b
 		inc rax
 		loop x_loop_clear_first
 
@@ -311,7 +313,7 @@
 		mul r8
 		add rax, r14
 	x_loop_clear_last:
-		mov [rax], r15
+		mov [rax], r15b
 		inc rax
 		loop x_loop_clear_last
 
@@ -320,10 +322,10 @@
 		mov rcx, r9
 		mov rax, r14
 	y_loop_clear:
-		mov [rax], r15
+		mov [rax], r15b
 		add rax, r8
 		dec rax
-		mov [rax], r15
+		mov [rax], r15b
 		inc rax
 		loop y_loop_clear
 
