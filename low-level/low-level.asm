@@ -18,10 +18,21 @@
 
 		cmp r8, 32
 		jl calculate_width_remainder ; Skip simd for width < 32 pixels
-
-		; Prepare division by 8 which is roughly div by 9 in this realm xd
-		movq xmm0, bit_shift
-		vpbroadcastq ymm9, xmm0
+		vpbroadcastb ymm9, divisor
+	divide_9:
+	; Divide all the image pixels in memory by 9 and save them back...
+		mov rax, r8
+		mul  r9
+		mov rcx, rax
+	i_loop:
+		mov rax, r13
+		add rax, rcx
+		mov r15, rax
+		xor rax, rax
+		mov al, [r15]
+		div divisor
+		mov [r15], al
+		loop i_loop
 
 	; Use R8/32  iterations of simds for single line of the input image (leave reminder of the image for further calculation)
 	y_loop:
