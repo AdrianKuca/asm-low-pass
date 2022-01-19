@@ -17,20 +17,17 @@ int main()
 
 	// Load image
 	BYTE *input_image = new BYTE[HEIGHT * WIDTH];
-	for (int i = 0, k = 0; i < WIDTH * HEIGHT; ++i)
-		input_image[i] = k++ % 255;
-
-	save_image("input", input_image, WIDTH, HEIGHT);
+	load_image("input.bmp", input_image);
 
 	// Process image high level
 	BYTE *output_image_high = new BYTE[HEIGHT * WIDTH];
 	filter_high(input_image, output_image_high, WIDTH, HEIGHT);
-	save_image("high", output_image_high, WIDTH, HEIGHT);
+	save_image("high.bmp", output_image_high, WIDTH, HEIGHT);
 
 	// Process image low level, CHANGES INPUT IMAGE IN PLACE
 	BYTE *output_image_low = new BYTE[HEIGHT * WIDTH];
 	filter_low(input_image, output_image_low, WIDTH, HEIGHT);
-	save_image("low", output_image_low, WIDTH, HEIGHT);
+	save_image("low.bmp", output_image_low, WIDTH, HEIGHT);
 
 	clock_t start_time, end_time;
 	int iterations = 10000;
