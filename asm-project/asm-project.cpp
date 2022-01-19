@@ -10,14 +10,19 @@ HINSTANCE dllHandle = NULL;
 #define WIDTH 200
 #define HEIGHT 100
 
-int main()
+int main(int argc, char *argv[])
 {
+	if (argc < 2)
+	{
+		cout << "Usage: " << argv[0] << " <bmp file>" << endl;
+		return 1;
+	}
 	dllHandle = LoadLibrary(TEXT("low-level.dll"));
 	Filter_Low filter_low = (Filter_Low)GetProcAddress(dllHandle, "filter_low");
 
 	// Load image
 	BYTE *input_image = new BYTE[HEIGHT * WIDTH];
-	load_image("input.bmp", input_image);
+	load_image(argv[1], input_image);
 
 	// Process image high level
 	BYTE *output_image_high = new BYTE[HEIGHT * WIDTH];
@@ -37,7 +42,7 @@ int main()
 	for (int i = 0; i < iterations; ++i)
 		filter_high(input_image, output_image_high, WIDTH, HEIGHT);
 	end_time = clock();
-	cout << "High level function execution time = " <<((double)(end_time - start_time) / CLOCKS_PER_SEC) << " s\n";
+	cout << "High level function execution time = " << ((double)(end_time - start_time) / CLOCKS_PER_SEC) << " s\n";
 
 	cout << "Starting low level performance test...\n";
 	start_time = clock();
@@ -49,6 +54,6 @@ int main()
 	delete[] input_image;
 	delete[] output_image_low;
 	delete[] output_image_high;
-
+	FreeLibrary(dllHandle);
 	return 0;
 }
