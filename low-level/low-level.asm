@@ -7,7 +7,7 @@
 	filter_low proc 
 		; arguments : const BYTE* input_image, BYTE* output_image, const int width, const int height
 		; RCX input_image; RDX output_image; R8 width; R9 height
-
+		
 		; REGISTERS
 		; r8 is width
 		; r9 is height
@@ -25,6 +25,7 @@
 	; Divide all the image pixels in memory by 9 and save them back...
 		mov rax, r8
 		mul  r9
+		dec rax
 		mov rcx, rax
 	i_loop:
 		mov rax, r13
@@ -35,7 +36,6 @@
 		div divisor
 		mov [r15], al
 		loop i_loop
-		
 	; Use R8/32  iterations of simds for single line of the input image (leave reminder of the image for further calculation)
 	y_loop:
 		mov rax, r8
@@ -181,6 +181,7 @@
 		xor rdx, rdx
 		div half_block_size
 		mov rcx, rax
+		inc rcx
 		xor r11, r11
 	x_single_pixel_loop_recalc:
 		; Recalculate every first pixel of 16 bytes
@@ -216,7 +217,7 @@
 			inc rax
 			add r15b, [rax]
 		
-			; Save result into [r14 + (r12+1)*r8 + 16*r11+1]
+			; Save result into [r14 + (r12+1)*r8 + 16*r11]
 			mov rax, r12
 			inc rax
 			mul r8
@@ -227,7 +228,7 @@
 			mul half_block_size
 			add rax, r10
 
-			;mov [rax], r15b
+			mov [rax], r15b
 
 		; Recalculate every last pixel of 16 bytes
 			mov rax , r12 ; y_index
@@ -262,17 +263,16 @@
 			inc rax
 			add r15b, [rax]
 
-			; Save result into [r14 + (r12+1)*r8 + (15+16*r11+1)]
+			; Save result into [r14 + (r12+1)*r8 + (15+16*r11)]
 			
 			mov rax, r12
 			inc rax
 			mul r8
 			add rax, r14
-			mov rax, r10
+			mov r10, rax
 
 			mov rax,r11
 			mul half_block_size
-			inc rax
 			add rax, half_block_size
 			dec rax
 			add rax, r10

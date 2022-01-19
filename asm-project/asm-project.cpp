@@ -32,32 +32,22 @@ int main()
 	filter_low(input_image, output_image_low, WIDTH, HEIGHT);
 	save_image("low", output_image_low, WIDTH, HEIGHT);
 
-	if (compare_images(output_image_high, output_image_low, WIDTH, HEIGHT))
-	{
-		cout << "Comparision test OK!\n";
-	}
-	else
-	{
-		cout << "Comparision test failed!!!";
-		exit(1);
-	}
-
 	clock_t start_time, end_time;
 	int iterations = 10000;
 
 	cout << "Starting high level performance test...\n";
 	start_time = clock();
 	for (int i = 0; i < iterations; ++i)
-		filter_high(input_image, output_image_low, WIDTH, HEIGHT);
+		filter_high(input_image, output_image_high, WIDTH, HEIGHT);
 	end_time = clock();
-	cout << "High level function execution time = " << ((float)(end_time - start_time) / CLOCKS_PER_SEC) << " s";
+	cout << "High level function execution time = " <<((double)(end_time - start_time) / CLOCKS_PER_SEC) << " s\n";
 
 	cout << "Starting low level performance test...\n";
 	start_time = clock();
 	for (int i = 0; i < iterations; ++i)
 		filter_low(input_image, output_image_low, WIDTH, HEIGHT);
 	end_time = clock();
-	cout << "Low level function execution time = " << ((float)(end_time - start_time) / CLOCKS_PER_SEC) << " s";
+	cout << "Low level function execution time = " << ((double)(end_time - start_time) / CLOCKS_PER_SEC) << " s\n";
 
 	delete[] input_image;
 	delete[] output_image_low;

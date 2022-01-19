@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "high-level.h"
 
+
 void filter_high(const BYTE *input_image, BYTE *output_image, const int width, const int height)
 {
 	int j;
